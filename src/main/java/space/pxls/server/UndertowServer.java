@@ -53,50 +53,50 @@ public class UndertowServer {
 
     public void start() {
         var pathHandler = new PxlsPathHandler()
-                .addPermGatedExactPath("/ws", "board.socket", Handlers.websocket(this::webSocketHandler))
-                .addPermGatedPrefixPath("/ws", "board.socket", Handlers.websocket(this::webSocketHandler))
-                .addPermGatedPrefixPath("/info", "board.info", new DisableCacheHandler(webHandler::info))
-                .addPermGatedPrefixPath("/boarddata", "board.data", new DisableCacheHandler(webHandler::data))
-                .addPermGatedPrefixPath("/heatmap", "board.data", new DisableCacheHandler(webHandler::heatmap))
-                .addPermGatedPrefixPath("/virginmap", "board.data", new DisableCacheHandler(webHandler::virginmap))
-                .addPermGatedPrefixPath("/placemap", "board.data", new DisableCacheHandler(webHandler::placemap))
-                .addPermGatedPrefixPath("/initialboarddata", "board.data", webHandler::initialdata)
-                .addPermGatedPrefixPath("/auth", "user.auth", new RateLimitingHandler(webHandler::auth, "http:auth", (int) App.getConfig().getDuration("server.limits.auth.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.auth.count")))
-                .addPermGatedPrefixPath("/signin", "user.auth", webHandler::signIn)
-                .addPermGatedPrefixPath("/signup", "user.auth", new RateLimitingHandler(webHandler::signUp, "http:signUp", (int) App.getConfig().getDuration("server.limits.signup.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.signup.count")))
-                .addPermGatedPrefixPath("/logout", "user.auth", webHandler::logout)
-                .addPermGatedPrefixPath("/lookup", "board.lookup", new RateLimitingHandler(webHandler::lookup, "http:lookup", (int) App.getConfig().getDuration("server.limits.lookup.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.lookup.count")))
-                .addPermGatedPrefixPath("/report", "board.report", webHandler::report)
-                .addPermGatedPrefixPath("/reportChat", "chat.report", webHandler::chatReport)
-                .addPermGatedPrefixPath("/whoami", "user.auth", webHandler::whoami)
-                .addPermGatedPrefixPath("/users", "user.online", webHandler::users)
-                .addPermGatedPrefixPath("/chat/history", "chat.history", new RateLimitingHandler(new DisableCacheHandler(webHandler::chatHistory), "http:chatHistory", (int) App.getConfig().getDuration("server.limits.chatHistory.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatHistory.count")))
-                .addPermGatedPrefixPath("/chat/setColor", "user.chatColorChange", new RateLimitingHandler(webHandler::chatColorChange, "http:chatColorChange", (int) App.getConfig().getDuration("server.limits.chatColorChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatColorChange.count")))
-                .addPermGatedPrefixPath("/setDiscordName", "user.discordNameChange", new RateLimitingHandler(webHandler::discordNameChange, "http:discordName", (int) App.getConfig().getDuration("server.limits.discordNameChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.discordNameChange.count")))
-                .addPermGatedPrefixPath("/admin", "user.admin", Handlers.resource(new ClassPathResourceManager(App.class.getClassLoader(), "public/admin/")).setCacheTime(10))
-                .addPermGatedPrefixPath("/admin/ban", "user.ban", webHandler::ban)
-                .addPermGatedPrefixPath("/admin/unban", "user.unban", webHandler::unban)
-                .addPermGatedPrefixPath("/admin/permaban", "user.permaban", webHandler::permaban)
-                .addPermGatedPrefixPath("/admin/shadowban", "user.shadowban", webHandler::shadowban)
-                .addPermGatedPrefixPath("/admin/chatban", "chat.ban", webHandler::chatban)
-                .addPermGatedPrefixPath("/admin/check", "board.check", webHandler::check)
-                .addPermGatedPrefixPath("/admin/delete", "chat.delete", webHandler::deleteChatMessage)
-                .addPermGatedPrefixPath("/admin/chatPurge", "chat.purge", webHandler::chatPurge)
-                .addPermGatedPrefixPath("/execNameChange", "user.namechange", webHandler::execNameChange)
-                .addPermGatedPrefixPath("/admin/flagNameChange", "user.namechange.flag", webHandler::flagNameChange)
-                .addPermGatedPrefixPath("/admin/forceNameChange", "user.namechange.force", webHandler::forceNameChange)
-                .addPermGatedPrefixPath("/admin/faction/edit", "faction.edit.other", new JsonReader(webHandler::adminEditFaction))
-                .addPermGatedPrefixPath("/admin/faction/delete", "faction.delete.other", new JsonReader(webHandler::adminDeleteFaction))
-                .addPermGatedPrefixPath("/admin/setFactionBlocked", "faction.setblocked", new AllowedMethodsHandler(webHandler::setFactionBlocked, Methods.POST))
-                .addPermGatedPrefixPath("/createNotification", "notification.create", webHandler::createNotification)
-                .addPermGatedPrefixPath("/sendNotificationToDiscord", "notification.discord", webHandler::sendNotificationToDiscord)
-                .addPermGatedPrefixPath("/setNotificationExpired", "notification.expired", webHandler::setNotificationExpired)
-                .addPermGatedPrefixPath("/notifications", "notification.list", webHandler::notificationsList)
-                .addPermGatedPrefixPath("/console", "management.console", new AllowedMethodsHandler(webHandler::webConsole, Methods.POST))
-                .addPermGatedPrefixPath("/api/v1/profile", "user.profile", new AllowedMethodsHandler(webHandler::profile, Methods.GET))
-                .addExactPath("/factions", new AllowedMethodsHandler(webHandler::getRequestingUserFactions, Methods.GET));
+                .addPermGatedExactPath("/ws", "board.socket", Handlers.websocket(this::webSocketHandler)) // /ws route for the websocket
+                .addPermGatedPrefixPath("/ws", "board.socket", Handlers.websocket(this::webSocketHandler)) // /ws? route for the websocket
+                .addPermGatedPrefixPath("/info", "board.info", new DisableCacheHandler(webHandler::info)) //retrieves the following information: canvas-code, canvas-width, canvas-height, canvas-palette, cooldown-info, auth services, chatBannerText, snipmode, 7TV emote set, terms+conditions, chatratelimitmessage, chatlinkedminimumpixelcount, chatlinksendtostaff, chatdefaultexternallinkpopup
+                .addPermGatedPrefixPath("/boarddata", "board.data", new DisableCacheHandler(webHandler::data)) //Retrieves the board.dat file from the server
+                .addPermGatedPrefixPath("/heatmap", "board.data", new DisableCacheHandler(webHandler::heatmap)) //Retrieves the heatmap.dat file from the server
+                .addPermGatedPrefixPath("/virginmap", "board.data", new DisableCacheHandler(webHandler::virginmap)) //Retrieves the virginmap.dat from the server
+                .addPermGatedPrefixPath("/placemap", "board.data", new DisableCacheHandler(webHandler::placemap)) //Retrieves the placemap.dat from the server
+                .addPermGatedPrefixPath("/initialboarddata", "board.data", webHandler::initialdata) //Retrieves the default_board.dat from the server
+                .addPermGatedPrefixPath("/auth", "user.auth", new RateLimitingHandler(webHandler::auth, "http:auth", (int) App.getConfig().getDuration("server.limits.auth.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.auth.count"))) //Base authentication route for the auth, this is the route OAuth services use as callback. each OAuth provider has their own subpath. ex. /auth/discord or /auth/twitch
+                .addPermGatedPrefixPath("/signin", "user.auth", webHandler::signIn) //Base signin path for sigining in a user. After authentication by OAuth provider, OAuth provider calls back to /auth/<OAuthprovidername> each OAuth provider has their own subpath. ex. /signin/discord 
+                .addPermGatedPrefixPath("/signup", "user.auth", new RateLimitingHandler(webHandler::signUp, "http:signUp", (int) App.getConfig().getDuration("server.limits.signup.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.signup.count"))) //Base signup route for when a user does not have an account yet. after OAuth provider has verified the user, they callback to /auth/<OAuthprovidername>. each OAuth provider has their own subpath here. ex. /signup/discord or /signup/twitch
+                .addPermGatedPrefixPath("/logout", "user.auth", webHandler::logout) //Route for logging the user out (yeets their pxls-token cookie)
+                .addPermGatedPrefixPath("/lookup", "board.lookup", new RateLimitingHandler(webHandler::lookup, "http:lookup", (int) App.getConfig().getDuration("server.limits.lookup.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.lookup.count"))) //The route that is called when a user performs a pixel lookup on the canvas by shift-leftclicking. takes parameters in the form of ?x=&y=
+                .addPermGatedPrefixPath("/report", "board.report", webHandler::report) //the route called when reporting a pixel 
+                .addPermGatedPrefixPath("/reportChat", "chat.report", webHandler::chatReport) //the route called when reporting a user in chat
+                .addPermGatedPrefixPath("/whoami", "user.auth", webHandler::whoami) // this route returns username and userid
+                .addPermGatedPrefixPath("/users", "user.online", webHandler::users) // this route returns the amount of users online
+                .addPermGatedPrefixPath("/chat/history", "chat.history", new RateLimitingHandler(new DisableCacheHandler(webHandler::chatHistory), "http:chatHistory", (int) App.getConfig().getDuration("server.limits.chatHistory.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatHistory.count"))) //returns full chat history in JSON format
+                .addPermGatedPrefixPath("/chat/setColor", "user.chatColorChange", new RateLimitingHandler(webHandler::chatColorChange, "http:chatColorChange", (int) App.getConfig().getDuration("server.limits.chatColorChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatColorChange.count"))) //Route to set the chatcolor of the user
+                .addPermGatedPrefixPath("/setDiscordName", "user.discordNameChange", new RateLimitingHandler(webHandler::discordNameChange, "http:discordName", (int) App.getConfig().getDuration("server.limits.discordNameChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.discordNameChange.count"))) //Route to change the discordname linked to the account
+                .addPermGatedPrefixPath("/admin", "user.admin", Handlers.resource(new ClassPathResourceManager(App.class.getClassLoader(), "public/admin/")).setCacheTime(10)) //no clue what this should do, but it is the base admin route. probably caches something or checks if the user has admin perms
+                .addPermGatedPrefixPath("/admin/ban", "user.ban", webHandler::ban) //The route called when banning a user for 24h from the canvas
+                .addPermGatedPrefixPath("/admin/unban", "user.unban", webHandler::unban) //The route called when unbanning a user from the canvas
+                .addPermGatedPrefixPath("/admin/permaban", "user.permaban", webHandler::permaban) //The route called when banning a user permanently from the canvas
+                .addPermGatedPrefixPath("/admin/shadowban", "user.shadowban", webHandler::shadowban) //The route called when shadowbanning a user on the canvas
+                .addPermGatedPrefixPath("/admin/chatban", "chat.ban", webHandler::chatban) //The route called when banning a user from chat
+                .addPermGatedPrefixPath("/admin/check", "board.check", webHandler::check) //The route called when opening the "Check" panel of and admin with extra admin options and information
+                .addPermGatedPrefixPath("/admin/delete", "chat.delete", webHandler::deleteChatMessage) //The route called when deleting a message from the db
+                .addPermGatedPrefixPath("/admin/chatPurge", "chat.purge", webHandler::chatPurge) //The route called when purging the chat
+                .addPermGatedPrefixPath("/execNameChange", "user.namechange", webHandler::execNameChange) //The route for NORMAL NONADMIN USERS when they are changing their name
+                .addPermGatedPrefixPath("/admin/flagNameChange", "user.namechange.flag", webHandler::flagNameChange) //The route called when requesting a user to change their name
+                .addPermGatedPrefixPath("/admin/forceNameChange", "user.namechange.force", webHandler::forceNameChange) //The route called when an ADMIN USER renames a user
+                .addPermGatedPrefixPath("/admin/faction/edit", "faction.edit.other", new JsonReader(webHandler::adminEditFaction)) //Route to call when an admin is making changes to a faction
+                .addPermGatedPrefixPath("/admin/faction/delete", "faction.delete.other", new JsonReader(webHandler::adminDeleteFaction)) //Route to call when an admin deletes a faction
+                .addPermGatedPrefixPath("/admin/setFactionBlocked", "faction.setblocked", new AllowedMethodsHandler(webHandler::setFactionBlocked, Methods.POST)) //Route to call when an admin restricts a faction
+                .addPermGatedPrefixPath("/createNotification", "notification.create", webHandler::createNotification) //Route to call when creating a board notification
+                .addPermGatedPrefixPath("/sendNotificationToDiscord", "notification.discord", webHandler::sendNotificationToDiscord) //Route to call when sending a notification via the discord webhook
+                .addPermGatedPrefixPath("/setNotificationExpired", "notification.expired", webHandler::setNotificationExpired) //Route to call when changing the expired date of a board notification
+                .addPermGatedPrefixPath("/notifications", "notification.list", webHandler::notificationsList) //Returns the list with current active notifications
+                .addPermGatedPrefixPath("/console", "management.console", new AllowedMethodsHandler(webHandler::webConsole, Methods.POST)) //why is there a webconsole endpoint????!
+                .addPermGatedPrefixPath("/api/v1/profile", "user.profile", new AllowedMethodsHandler(webHandler::profile, Methods.GET)) //retrieves profile. why tf does this one have an /api/ route?
+                .addExactPath("/factions", new AllowedMethodsHandler(webHandler::getRequestingUserFactions, Methods.GET)); //get the available factions in JSON format
         if (new File(App.getStorageDir().resolve("emoji").toString()).exists()) {
-            pathHandler.addPrefixPath("/emoji", Handlers.resource(new FileResourceManager(new File(App.getStorageDir().resolve("emoji").toString()))).setCacheTime(604800));
+            pathHandler.addPrefixPath("/emoji", Handlers.resource(new FileResourceManager(new File(App.getStorageDir().resolve("emoji").toString()))).setCacheTime(604800)); //if there is a folder with emoji's, expose the emoji route so the emotes can be use in chat
         }
         PxlsRoutingHandler routingHandler = PxlsHandlers.routing()
             .getPermGated("/factions/{fid}", "faction.data", new JsonReader(new RateLimitingHandler(webHandler::manageFactions, "http:manageFactions", (int) App.getConfig().getDuration("server.limits.manageFactions.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.manageFactions.count"), App.getConfig().getBoolean("server.limits.manageFactions.global"))))

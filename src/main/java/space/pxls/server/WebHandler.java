@@ -2076,6 +2076,11 @@ public class WebHandler {
         return result;
     }
 
+    /**
+     * 
+     * @param username username to check
+     * @return <boolean> returns true or false
+     */
     private boolean validateUsername(String username) {
         return !username.isEmpty() && username.matches("[a-zA-Z0-9_\\-]+");
     }
