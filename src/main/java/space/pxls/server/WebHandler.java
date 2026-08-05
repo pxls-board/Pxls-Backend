@@ -538,15 +538,6 @@ public class WebHandler {
                 .setSameSiteMode((exchange.isSecure() ? CookieSameSiteMode.NONE : CookieSameSiteMode.LAX).toString())
                 .setSecure(exchange.isSecure())
                 .setPath("/")
-                .setDomain("." + hostname)
-                .setExpires(futureCalendar.getTime())
-        );
-        exchange.setResponseCookie(
-            new CookieImpl("pxls-token", loginToken)
-                .setHttpOnly(true)
-                .setSameSiteMode((exchange.isSecure() ? CookieSameSiteMode.NONE : CookieSameSiteMode.LAX).toString())
-                .setSecure(exchange.isSecure())
-                .setPath("/")
                 .setDomain(hostname)
                 .setExpires(futureCalendar.getTime())
         );
