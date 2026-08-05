@@ -114,8 +114,7 @@ public class App {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Saving map+backup, and flushing logs before shutdown...");
-            board.force();
-            saveMapBackup();
+            backupBoard();
             LogManager.shutdown();
         }));
 
@@ -128,7 +127,7 @@ public class App {
                 tickStackedPixels();
                 checkUserTimeout();
             }
-        }, 0, 5 * 1000);
+        }, 0, 5 * 1000); //5 seconds
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -173,9 +172,7 @@ public class App {
                 }
             } else if (token[0].equalsIgnoreCase("save")) {
                 try {
-                    board.force();
-                    saveMapBackup();
-                    System.out.println("Success!");
+                    backupBoard();
                 } catch (Exception x) {
                     x.printStackTrace();
                 }
@@ -843,8 +840,25 @@ public class App {
         RateLimitFactory.registerBucketHolder(DBChatMessage.class, new RateLimitFactory.BucketConfig(((int) App.getConfig().getDuration("server.limits.chat.time", TimeUnit.SECONDS)), App.getConfig().getInt("server.limits.chat.count")));
         RateLimitFactory.registerBucketHolder("http:discordName", new RateLimitFactory.BucketConfig((int) App.getConfig().getDuration("server.limits.discordNameChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.discordNameChange.count")));
 
-        mapSaveTimer = new PxlsTimer(config.getDuration("board.saveInterval", TimeUnit.SECONDS));
-        mapBackupTimer = new PxlsTimer(config.getDuration("board.backupInterval", TimeUnit.SECONDS));
+        long mapSaveInterval = config.getDuration("board.saveInterval", TimeUnit.MILLISECONDS);
+        long mapBackupInterval = config.getDuration("board.backupInterval", TimeUnit.MILLISECONDS);
+        
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                board.force(); //Persist in-memory changes to the board.dat file
+            }
+        }, 10000, mapSaveInterval);
+        
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                backupBoard(); //Persist in-memory changes to the board.dat file AND backup the board to the ./backup folder
+            }
+        }, 10000, mapBackupInterval);
+        
+        // mapSaveTimer = new PxlsTimer(mapSaveInterval); //THis is some old code
+        // mapBackupTimer = new PxlsTimer(mapBackupInterval); //this is some old code that didnt work
         stackMultiplier = App.getConfig().getInt("stacking.cooldownMultiplier");
         stackMaxStacked = App.getConfig().getInt("stacking.maxStacked");
         userIdleTimeout = App.getConfig().getDuration("userIdleTimeout", TimeUnit.MILLISECONDS);
@@ -863,6 +877,7 @@ public class App {
             }
         }
     }
+    
     private static void loadRoles() {
         // NOTE: This differs from the way pxls.conf is handled, as we don't merge the roles-reference.conf
         // file into roles.conf, but use it as a default in case roles.conf doesn't exist or is invalid.
@@ -905,6 +920,7 @@ public class App {
             role.setInherits(inherits);
         });
     }
+    
     public static void loadPalette() {
         // NOTE: This differs from the way pxls.conf is handled, as we don't merge the palette-reference.conf
         // file into roles.conf, but use it as a default in case palette.conf doesn't exist or is invalid.
@@ -948,7 +964,7 @@ public class App {
 
         palette = new Palette(colors, (byte) defaultIdx);
     }
-
+    
     public static int getStackMultiplier() {
         return stackMultiplier;
     }
@@ -1470,5 +1486,11 @@ public class App {
 
     public static long getUserIdleTimeout() {
         return userIdleTimeout;
+    }
+
+    private static void backupBoard() {
+        board.force();
+        saveMapBackup();
+        System.out.println("Saved & backed up map");
     }
 }
